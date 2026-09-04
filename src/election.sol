@@ -116,16 +116,16 @@ require (chairman == msg.sender, you are a fool you are not the chairman");
     function vote(uint64 id, address candidateAddress, uint16 age, address voterAddress) public {
         require(isElectionStarted == true, "wait for your chairman, getelection started function is not called yet");
         //1. if a candidate is deleted, make sure that he cant be voted for
-        if (candidateIdToAddr[candidateAddress] != id{
+        if candidateIdToAddr[candidateAddress] != id{
             revert thisCandidateIsDeleted();
         }
         //2. are you registered by the chairman
-        if (is18Year[voterAddress] == false) {
+        if (is18Year[msg.sender] == false) {
             revert youAreNotRegistered();
         }
         //3. people cant vote 2 times
             // use a mapping the check that an address has voted or not
-        if (hasVoted[msg.sender] == true) {
+        if (hasVoted[voterAddress] == true) {
             revert votedAlready();
         }
         // for each person that calls the vote function, the candidate he want to vote for should increase by 1
@@ -155,7 +155,7 @@ require (chairman == msg.sender, you are a fool you are not the chairman");
         if (age < 18) {
             revert Not18yet();
         }
-        is18[voter] = true;
+        is18[msg.sender] = true;
         return true;
     }
 
