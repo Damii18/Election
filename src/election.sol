@@ -1,8 +1,11 @@
-// SPDX-Lincense-Identifier: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
 contract election {
-    // 1. we want difereent candiditate to be able to vote
+    constructor () {
+        chairman = msg.sender;
+    }
+    // 1. we want different candiditate to be able to vote
 // 2. elections to be able to be called/ started.
 // 3. we want different paties
 // 4. we want to be able to remove candidates
@@ -19,6 +22,9 @@ contract election {
         string candidateName;
         uint256 totalCandidateVote;
     }
+    struct party {
+        string partyName;
+    }
     address[] public people;
     bool private isElectionStarted = false;
     address highestVoter;
@@ -27,6 +33,7 @@ contract election {
     address public chairman;
     // <array type keyword> visibility <array name>
     candidate[] public candidates;
+    party[] public parties;
     // first person 
     //  address candidateAddr;
     //     string candidateName;
@@ -54,16 +61,16 @@ contract election {
 // only the inec chariman
     function createCandidates(address _candidateAddress, string memory _name) public {
 
+require (chairman == msg.sender, you are a fool you are not the chairman");
         uint256 totalAmountOfCandidate = 0;
-        uint256 id = 1;
-        candidateIdToAddr[msg.sender] = id;
+        uint256 id = candidates.length + 1;
+        candidateIdToAddr[_candidateAddress] = id;
         // i want to set an instruction, if the chairman is not the person calling the create
         // candidate function throw an error and the tx should not ne executed
         // 0x545DF19a98CD6E243AbBc7C41Ae5b940F0325223 == 0x545DF19a98CD6E243AbBc7C41Ae5b940F0325223
         // == for comparing that 2 times are equal
         // != or comparing that 2 times are NOT equal
-        require(chairman == msg.sender, "you are a fool, you are not the chaiman"); 
-        
+    
         // 2nd method to declare error handling
         if (totalAmountOfCandidate != 0) {
             revert totalAmoutnShouldBezero();
@@ -88,27 +95,32 @@ contract election {
 
     }
     // TO-do complete this function
-    function createParties() public {
-
+    function createParties(string memory _partyName) public{
+        if (msg.sender != chairman) {
+            revert Election__notChairmanError();
+        }
+        parties.push(party({
+            partyName: _partyName
+        }));
     }
     // remove candidate function
-    function removeCandidates() public {
+    function removeCandidates(adress _candidateAddress) public {
         if (msg.sender != chairman) {
             revert Election__notChairmanError();
         }
         
-        delete candidateIdToAddr[msg.sender];
+        delete candidateIdToAddr[_candidateAddress];
 
     }
     // 
     function vote(uint64 id, address candidateAddress, uint16 age, address voterAddress) public {
         require(isElectionStarted == true, "wait for your chairman, getelection started function is not called yet");
         //1. if a candidate is deleted, make sure that he cant be voted for
-        if (candidateIdToAddr[candidateAddress] == 0) {
+        if (candidateIdToAddr[candidateAddress] != id{
             revert thisCandidateIsDeleted();
         }
-        //2. are you registered by the chairma
-        if (registerVoters(age, voterAddress) == false) {
+        //2. are you registered by the chairman
+        if (is18Year[voterAddress] == false) {
             revert youAreNotRegistered();
         }
         //3. people cant vote 2 times
@@ -128,30 +140,28 @@ contract election {
         winner(id);
     }
     function winner(uint64 id) private {
-        // if that current candidate that a voter votes for, we will that the current voted person for is more that the higtest candadite at that moment
-        // samuel 
-        
-        if (candidates[id].totalCandidateVote > candidates[highestVoterId].totalCandidateVote) {
-            highestVoterId = id;
+        if (highestVoterId == 0) {
+            highestVoterId = id; 
+        } else if (
+            candidates [Id - 1]. totalCandidateVote >
+            candidates [highestVoterId - 1]. totalCandidateVote
+        ) {
+            highestVoterId = Id;
         }
         
     }
 
-    function registerVoters(uint16 age, address voter) public returns(bool) {
-        if (voter != chairman) {
-            revert Election__notChairmanError();
-        }
+    function registerVoters(uint16 age, address voter) public returns(bool){
         if (age < 18) {
             revert Not18yet();
         }
-        is18Year[voter] = true;
-
+        is18[voter] = true;
         return true;
     }
 
     ///////////GETTER FUNCTION////////
     // complete this function 
     function getWinner() public view returns(uint256) {
-        // winner();
+        return highestVoterId;
     }
 }
